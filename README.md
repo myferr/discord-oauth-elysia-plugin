@@ -13,10 +13,10 @@ A simple and flexible Elysia plugin for implementing Discord OAuth2 authenticati
 ## Installation
 
 ```bash
-# If using as a local package
-cd discord-oauth-elysia-plugin
-bun install
-bun run build
+npm install discord-oauth-elysia-plugin # npm
+yarn add discord-oauth-elysia-plugin # yarn
+pnpm add discord-oauth-elysia-plugin # pnpm
+bun add discord-oauth-elysia-plugin # bun
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ bun run build
 
 ```typescript
 import { Elysia } from "elysia";
-import { discordOAuth } from "./discord-oauth-elysia-plugin";
+import { discordOAuth } from "discord-oauth-elysia-plugin";
 
 const app = new Elysia()
   .use(
@@ -41,7 +41,7 @@ const app = new Elysia()
 ### Custom Route Prefix
 
 ```typescript
-import { discordOAuth } from "./discord-oauth-elysia-plugin";
+import { discordOAuth } from "discord-oauth-elysia-plugin";
 
 const app = new Elysia().use(
   discordOAuth({
@@ -57,7 +57,7 @@ const app = new Elysia().use(
 
 ```typescript
 import { Elysia } from "elysia";
-import { discordOAuth } from "./discord-oauth-elysia-plugin";
+import { discordOAuth } from "discord-oauth-elysia-plugin";
 import { getUsersCollection } from "./utils/mongo";
 
 const app = new Elysia().use(
