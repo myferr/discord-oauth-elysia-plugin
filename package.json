@@ -1,6 +1,6 @@
 {
   "name": "discord-oauth-elysia-plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A simple Elysia plugin for Discord OAuth2 authentication",
   "type": "module",
   "main": "./dist/index.js",
