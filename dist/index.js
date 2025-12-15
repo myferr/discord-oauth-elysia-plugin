@@ -27,7 +27,7 @@ import { Elysia } from "elysia";
  * ```
  */
 export function discordOAuth(config) {
-    const { clientId, clientSecret, redirectUri, routePrefix = "/auth/discord", scopes = ["identify"], onUserAuthenticated, } = config;
+    const { clientId, clientSecret, redirectUri, routePrefix = "/auth/discord", scopes = ["identify"], onUserAuthenticated, response, } = config;
     // Normalize route prefix (remove trailing slash, ensure leading slash)
     const normalizedPrefix = routePrefix.replace(/\/$/, "") || "/auth/discord";
     const authorizeRoute = normalizedPrefix;
@@ -123,12 +123,20 @@ export function discordOAuth(config) {
             if (onUserAuthenticated) {
                 await onUserAuthenticated(user, tokenJson);
             }
-            return new Response(JSON.stringify({
-                user,
-                access_token: tokenJson.access_token,
-                token_type: tokenJson.token_type,
-                expires_in: tokenJson.expires_in,
-            }), {
+            // Allow the user to fully control the response body if desired
+            const body = response
+                ? await response({
+                    user,
+                    rawUser: userJson,
+                    tokens: tokenJson,
+                })
+                : {
+                    user,
+                    access_token: tokenJson.access_token,
+                    token_type: tokenJson.token_type,
+                    expires_in: tokenJson.expires_in,
+                };
+            return new Response(JSON.stringify(body), {
                 status: 200,
                 headers: {
                     "Content-Type": "application/json",
