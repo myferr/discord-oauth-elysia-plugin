@@ -53,12 +53,16 @@ const app = new Elysia().use(
 );
 ```
 
-### With MongoDB Integration
+### With MongoDB Integration (using official driver)
 
 ```typescript
 import { Elysia } from "elysia";
+import { MongoClient } from "mongodb";
 import { discordOAuth } from "discord-oauth-elysia-plugin";
-import { getUsersCollection } from "./utils/mongo";
+
+const client = new MongoClient(process.env.MONGODB_URI!);
+const db = client.db("my-app");
+const users = db.collection("users");
 
 const app = new Elysia().use(
   discordOAuth({
@@ -67,7 +71,6 @@ const app = new Elysia().use(
     redirectUri: "http://localhost:8080/auth/discord/callback",
     routePrefix: "/auth/discord",
     onUserAuthenticated: async (user, tokens) => {
-      const users = getUsersCollection();
       await users.updateOne(
         { discordId: user.id },
         {
@@ -102,14 +105,15 @@ const app = new Elysia().use(
 
 ## Configuration Options
 
-| Option                | Type       | Required | Default           | Description                                              |
-| --------------------- | ---------- | -------- | ----------------- | -------------------------------------------------------- |
-| `clientId`            | `string`   | Yes      | -                 | Your Discord application client ID                       |
-| `clientSecret`        | `string`   | Yes      | -                 | Your Discord application client secret                   |
-| `redirectUri`         | `string`   | Yes      | -                 | The redirect URI configured in your Discord application  |
-| `routePrefix`         | `string`   | No       | `"/auth/discord"` | The route prefix for OAuth routes                        |
-| `scopes`              | `string[]` | No       | `["identify"]`    | Discord OAuth2 scopes to request                         |
-| `onUserAuthenticated` | `function` | No       | -                 | Callback function called after successful authentication |
+| Option                | Type       | Required | Default                               | Description                                                                                    |
+| --------------------- | ---------- | -------- | ------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `clientId`            | `string`   | Yes      | -                                     | Your Discord application client ID                                                             |
+| `clientSecret`        | `string`   | Yes      | -                                     | Your Discord application client secret                                                         |
+| `redirectUri`         | `string`   | Yes      | -                                     | The redirect URI configured in your Discord application                                        |
+| `routePrefix`         | `string`   | No       | `"/auth/discord"`                     | The route prefix for OAuth routes                                                              |
+| `scopes`              | `string[]` | No       | `["identify"]`                        | Discord OAuth2 scopes to request                                                               |
+| `onUserAuthenticated` | `function` | No       | -                                     | Callback function called after successful authentication                                       |
+| `response`            | `function` | No       | returns `{ user, access_token, ... }` | Customize the JSON returned from the callback route; receives user, rawUser, and token details |
 
 ## Routes
 
@@ -125,7 +129,7 @@ The plugin creates two routes:
 
 ## Response Format
 
-The callback route returns a JSON response with the following structure:
+By default, the callback route returns a JSON response with the following structure:
 
 ```json
 {
@@ -143,6 +147,24 @@ The callback route returns a JSON response with the following structure:
   "token_type": "Bearer",
   "expires_in": 604800
 }
+```
+
+You can override this completely using the `response` option:
+
+```typescript
+const app = new Elysia().use(
+  discordOAuth({
+    clientId: process.env.DISCORD_CLIENT_ID!,
+    clientSecret: process.env.DISCORD_CLIENT_SECRET!,
+    redirectUri: "http://localhost:8080/auth/discord/callback",
+    response: ({ user, rawUser, tokens }) => ({
+      id: user.id,
+      username: user.username,
+      accessToken: tokens.access_token,
+      // add whatever else you need here
+    }),
+  })
+);
 ```
 
 ## TypeScript Types
