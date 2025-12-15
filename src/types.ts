@@ -28,6 +28,21 @@ export type DiscordUser = {
   locale?: string;
 };
 
+export type DiscordOAuthResponseBuilderInput = {
+  /**
+   * The normalized user object built by this library.
+   */
+  user: DiscordUser;
+  /**
+   * The raw Discord user response from the `/users/@me` endpoint.
+   */
+  rawUser: DiscordUserResponse;
+  /**
+   * The full token response returned by Discord.
+   */
+  tokens: DiscordTokenResponse;
+};
+
 export type DiscordOAuthConfig = {
   clientId: string;
   clientSecret: string;
@@ -38,4 +53,13 @@ export type DiscordOAuthConfig = {
     user: DiscordUser,
     tokens: DiscordTokenResponse
   ) => Promise<void> | void;
+  /**
+   * Optional function to customize the JSON returned from the callback route.
+   *
+   * If not provided, the default response is:
+   * `{ user, access_token, token_type, expires_in }`
+   */
+  response?: (
+    input: DiscordOAuthResponseBuilderInput
+  ) => Promise<unknown> | unknown;
 };
